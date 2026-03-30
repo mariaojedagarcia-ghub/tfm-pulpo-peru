@@ -1,61 +1,24 @@
-import streamlit as st
-import pandas as pd
-import joblib
-import plotly.express as px
-import os
-
-# Configuración de la página
-st.set_page_config(page_title="Predicción Pulpo Perú", layout="wide")
-
-st.title("Sistema de Predicción de Desembarques de Pulpo - Perú")
-st.markdown("""
-Esta aplicación utiliza un modelo de Machine Learning (Ridge Regression) para estimar 
-las capturas de pulpo basadas en los índices climáticos del Pacífico (Niño 1+2 y SOI).
-""")
-
-# --- CARGA DE DATOS Y MODELO ---
-@st.cache_resource
-def load_assets():
-    # Cambia estas rutas por las de tu proyecto
-    data = pd.read_parquet('datos.parquet')
-    model = joblib.load('modelo_ridge_final.pkl')
-    return data, model
-
-try:
-    df, model = load_assets()
+# --- LÓGICA DE PREDICCIÓN ---
+    # Tu modelo espera 13 columnas. Según tus datos, el orden más probable es:
+    # [año, mes, nino12, soi, nino12_lag1, soi_lag1, nino12_lag2, soi_lag2, nino12_lag3, soi_lag3, + 3 extras]
     
-    # --- BARRA LATERAL: ENTRADA DE DATOS ---
-    st.sidebar.header("Configuración de Predicción")
-    st.sidebar.write("Introduce los valores climáticos actuales para predecir:")
+    import datetime
+    hoy = datetime.datetime.now()
     
-    # Usamos los últimos valores conocidos como sugerencia
-    last_nino = float(df['nino12'].iloc[-1])
-    last_soi = float(df['soi'].iloc[-1])
+    # Creamos la lista de 13 valores
+    inputs = [[
+        hoy.year,          # 1. Año
+        hoy.month,         # 2. Mes
+        nino_input,        # 3. nino12
+        soi_input,         # 4. soi
+        nino_input,        # 5. nino12_lag1 (simulado)
+        soi_input,         # 6. soi_lag1 (simulado)
+        nino_input,        # 7. nino12_lag2 (simulado)
+        soi_input,         # 8. soi_lag2 (simulado)
+        nino_input,        # 9. nino12_lag3 (simulado)
+        soi_input,         # 10. soi_lag3 (simulado)
+        0, 0, 0            # 11, 12, 13. Relleno para ONI/Otros
+    ]]
     
-    nino_input = st.sidebar.number_input("Índice Niño 1+2 actual", value=last_nino)
-    soi_input = st.sidebar.number_input("Índice SOI actual", value=last_soi)
-
-    # --- PREDICCIÓN ---
-    # Nota: El modelo espera los lags que creamos. Para esta demo simple, 
-    # usamos el valor actual como estimador del lag.
-    features = [[nino_input, nino_input, nino_input, nino_input, soi_input, soi_input, soi_input, soi_input]]
-    # (Ajusta 'features' según las columnas exactas que usaste en tu entrenamiento X_train)
-    
-    pred = model.predict(features)[0]
-    pred_final = max(0, pred) # Aplicamos la solución al punto 2: evitar negativos
-
-    # --- VISUALIZACIÓN ---
-    col1, col2 = st.columns([1, 2])
-    
-    with col1:
-        st.metric(label="Predicción Desembarque (t)", value=f"{pred_final:.2f} t")
-        st.write("Margen de error (MAPE): 20.3%")
-        
-    with col2:
-        # Gráfica histórica
-        fig = px.line(df, x=df.index, y='desembarques_t', title="Evolución Histórica de Capturas")
-        st.plotly_chart(fig, use_container_width=True)
-
-except Exception as e:
-    st.error(f"Error al cargar los archivos: {e}")
-    st.info("Asegúrate de que el modelo (.pkl) y el dataset (.parquet) estén en la misma carpeta que este script.")
+    prediccion_raw = model.predict(inputs)[0]
+    prediccion_final = max(0, float(prediccion_raw))
