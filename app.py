@@ -8,7 +8,7 @@ import os
 
 # ─── Configuración de la página ───
 st.set_page_config(
-    page_title="Predicción Pulpo Perú",
+    page_title="TFM · Predicción Pulpo Perú — María Ojeda García",
     page_icon="icon_pulpo.png",
     layout="wide"
 )
@@ -61,6 +61,7 @@ with col_icon:
 with col_title:
     st.title("Predicción de Desembarques de Pulpo — Perú")
 st.markdown(
+    "**Trabajo Fin de Máster** · María Ojeda García  \n"
     "Modelo Ridge Regression entrenado con índices climáticos del Pacífico "
     "(Niño 1+2 y SOI) y datos históricos de capturas."
 )
@@ -274,6 +275,17 @@ try:
         datos más recientes de la NOAA y el BOM.
     </div>
     """, unsafe_allow_html=True)
+
+    # ─── Pie de página ───
+    st.markdown("---")
+    st.markdown(
+        "<div style='text-align: center; color: #64748b; font-size: 0.82rem; padding: 0.5rem 0 1rem;'>"
+        "TFM — Predicción de desembarques de pulpo en Perú mediante variables climáticas<br>"
+        "María Ojeda García · Máster en Big Data · 2025<br>"
+        "Fuentes: IMARPE, NOAA (CPC), BOM Australia"
+        "</div>",
+        unsafe_allow_html=True
+    )
 
 except FileNotFoundError as e:
     st.error(f"Archivo no encontrado: {e}")
