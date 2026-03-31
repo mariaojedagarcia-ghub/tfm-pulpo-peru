@@ -9,7 +9,7 @@ import os
 # ─── Configuración de la página ───
 st.set_page_config(
     page_title="Predicción Pulpo Perú",
-    page_icon="🐙",
+    page_icon="icon_pulpo.png",
     layout="wide"
 )
 
@@ -55,7 +55,11 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ─── Título ───
-st.title("🐙 Predicción de Desembarques de Pulpo — Perú")
+col_icon, col_title = st.columns([0.08, 0.92])
+with col_icon:
+    st.image("icon_pulpo.png", width=64)
+with col_title:
+    st.title("Predicción de Desembarques de Pulpo — Perú")
 st.markdown(
     "Modelo Ridge Regression entrenado con índices climáticos del Pacífico "
     "(Niño 1+2 y SOI) y datos históricos de capturas."
