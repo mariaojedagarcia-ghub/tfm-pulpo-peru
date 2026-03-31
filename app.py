@@ -183,7 +183,6 @@ try:
     #  BARRA LATERAL
     # ═══════════════════════════════════════
 
-    st.sidebar.image("icon_pulpo.png", width=50)
     st.sidebar.header("Selecciona un mes")
 
     if noaa_ok:
