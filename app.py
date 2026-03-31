@@ -152,6 +152,16 @@ st.markdown(
 try:
     model, scaler, feature_names, df, df_dep = load_assets()
 
+    # Compatibilidad: normalizar nombres de columna (versiones antiguas usan 'año')
+    if 'año' in df.columns:
+        df = df.rename(columns={'año': 'anio'})
+    if 'desembarques_t' in df.columns and 'desembarque_t' not in df.columns:
+        df = df.rename(columns={'desembarques_t': 'desembarque_t'})
+    if 'nino12' in df.columns and 'nino12_anom' not in df.columns:
+        df = df.rename(columns={'nino12': 'nino12_anom'})
+    if df_dep is not None and 'año' in df_dep.columns:
+        df_dep = df_dep.rename(columns={'año': 'anio'})
+
     # Fechas para gráficas
     df_plot = df.copy()
     df_plot['fecha'] = pd.to_datetime(
@@ -475,4 +485,13 @@ except FileNotFoundError as e:
             "`feature_names.pkl`, `datos_modelo.parquet`, `icon_pulpo.png`, "
             "y (opcional) `datos_departamento.parquet`.")
 except Exception as e:
+    import traceback
     st.error(f"Error inesperado: {e}")
+    with st.expander("Detalle del error (para depuración)"):
+        st.code(traceback.format_exc())
+        # Mostrar info de los archivos cargados para diagnosticar
+        try:
+            df_debug = pd.read_parquet('datos_modelo.parquet')
+            st.write(f"Columnas del parquet: {df_debug.columns.tolist()}")
+        except:
+            st.write("No se pudo leer datos_modelo.parquet")
