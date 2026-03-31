@@ -200,25 +200,34 @@ try:
     
     st.sidebar.header("Selecciona una fecha")
     # Obtener mes y año actuales para el valor por defecto
+    # --- Lógica de fecha por defecto (Mes Anterior) ---
+
     ahora = datetime.now()
-    mes_actual = ahora.month
-    anio_actual = ahora.year
-    # Buscamos en qué posición de la lista está el año actual
+    
+    # Usamos el operador módulo para que el mes siempre sea válido (1-12)
+    # Si ahora es 1 (Enero), (1 - 2) % 12 + 1 = 12 (Diciembre)
+    mes_defecto = (ahora.month - 2) % 12 + 1
+    anio_defecto = ahora.year if ahora.month > 1 else ahora.year - 1
+    
+    st.sidebar.header("Selecciona una fecha")
+    
+    # Configuración Año
     años_lista = list(range(max_anio, 1996, -1))
     try:
-        index_anio = años_lista.index(anio_actual)
+        index_anio = años_lista.index(anio_defecto)
     except ValueError:
-        index_anio = 0 # Fallback al primer año si 2026 no está en el rango
+        index_anio = 0
     
     anio_pred = st.sidebar.selectbox("Año", años_lista, index=index_anio)
-    # Ahora el mes actual
+    
+    # Configuración Mes
+    # El índice para el selectbox es simplemente mes_defecto - 1
     mes_pred = st.sidebar.selectbox(
         "Mes", 
         list(range(1, 13)),
         format_func=lambda m: MESES[m - 1], 
-        index=mes_actual - 1  # -1 porque los índices en Python empiezan en 0
+        index=mes_defecto - 1
     )
-
     # --- Buscar clima ---
     nino_val, soi_val, fuente_clima = get_climate(anio_pred, mes_pred, df, nino_noaa, soi_noaa)
 
