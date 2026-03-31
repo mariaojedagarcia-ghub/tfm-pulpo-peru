@@ -206,7 +206,7 @@ try:
     st.sidebar.header("Selecciona un mes")
 
     if noaa_ok:
-        st.sidebar.success("Conectado a la NOAA", icon="🌊")
+        st.sidebar.success("Conectado a la NOAA")
         # El último mes disponible en NOAA
         ultimo_noaa_año = int(nino_noaa['año'].max())
         ultimo_noaa_row = nino_noaa[nino_noaa['año'] == ultimo_noaa_año]
