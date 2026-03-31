@@ -270,7 +270,7 @@ try:
     st.markdown("""
     <div class="info-box">
         <strong>Sobre el modelo:</strong> Ridge Regression (α=10) con 13 variables de entrada.
-        Entrenado con datos de 1997 a 2025. Los lags climáticos se toman de los últimos meses
+        Entrenado con datos de 1996 a 2025. Los lags climáticos se toman de los últimos meses
         disponibles en el dataset. Para predicciones reales, actualiza los índices con los
         datos más recientes de la NOAA y el BOM.
     </div>
@@ -281,7 +281,7 @@ try:
     st.markdown(
         "<div style='text-align: center; color: #64748b; font-size: 0.82rem; padding: 0.5rem 0 1rem;'>"
         "TFM — Predicción de desembarques de pulpo en Perú mediante variables climáticas<br>"
-        "María Ojeda García · Máster en Big Data · 2025<br>"
+        "María Ojeda García · Máster en Big Data · 2025/26<br>"
         "Fuentes: IMARPE, NOAA (CPC), BOM Australia"
         "</div>",
         unsafe_allow_html=True
