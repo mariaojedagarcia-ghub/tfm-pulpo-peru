@@ -183,7 +183,7 @@ try:
     #  BARRA LATERAL
     # ═══════════════════════════════════════
 
-    st.sidebar.header("Selecciona un mes")
+
 
     if noaa_ok:
         st.sidebar.success("Conectado a la NOAA", icon="🌊")
@@ -196,6 +196,8 @@ try:
         st.sidebar.caption(f"Último dato local: {MESES[ultimo_mes - 1]} {ultimo_anio}")
         max_anio = ultimo_anio + 1
 
+    
+    st.sidebar.header("Selecciona una fecha")
     anio_pred = st.sidebar.selectbox("Año", list(range(max_anio, 1996, -1)), index=0)
     mes_pred = st.sidebar.selectbox("Mes", list(range(1, 13)),
                                      format_func=lambda m: MESES[m - 1], index=0)
