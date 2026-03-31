@@ -187,7 +187,7 @@ try:
 
 
     if noaa_ok:
-        st.sidebar.success("Conectado a la NOAA", icon="🌊")
+        st.sidebar.success("Conectado a la NOAA")
         ultimo_noaa_anio = int(nino_noaa['anio'].max())
         ultimo_noaa_mes = int(nino_noaa[nino_noaa['anio'] == ultimo_noaa_anio]['mes'].max())
         st.sidebar.caption(f"Último dato NOAA: {MESES[ultimo_noaa_mes - 1]} {ultimo_noaa_anio}")
