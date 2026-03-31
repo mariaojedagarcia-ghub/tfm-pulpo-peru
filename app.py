@@ -230,7 +230,7 @@ try:
     # ─── Sección inferior: detalle de los datos de entrada ───
     st.divider()
 
-    with st.expander("🔍 Detalle de las variables usadas en la predicción"):
+    with st.expander("Detalle de las variables usadas en la predicción"):
         col_a, col_b = st.columns(2)
         with col_a:
             st.markdown("**Variables climáticas**")
@@ -269,7 +269,7 @@ try:
 
     st.markdown("""
     <div class="info-box">
-        <strong>ℹ️ Sobre el modelo:</strong> Ridge Regression (α=10) con 13 variables de entrada.
+        <strong>Sobre el modelo:</strong> Ridge Regression (α=10) con 13 variables de entrada.
         Entrenado con datos de 1997 a 2025. Los lags climáticos se toman de los últimos meses
         disponibles en el dataset. Para predicciones reales, actualiza los índices con los
         datos más recientes de la NOAA y el BOM.
