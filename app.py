@@ -80,7 +80,7 @@ try:
     model, scaler, feature_names, df = load_assets()
 
     # ─── Barra lateral: entrada de datos ───
-    st.sidebar.header("📊 Configuración de Predicción")
+    st.sidebar.header("Configuración de Predicción")
     st.sidebar.markdown("Introduce los valores climáticos del mes que quieres predecir:")
 
     # Último registro conocido (para valores por defecto y lags)
