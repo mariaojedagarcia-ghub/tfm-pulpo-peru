@@ -569,7 +569,7 @@ Si la NOAA no está accesible, la app usa los datos locales.
     st.markdown(
         "<div style='text-align: center; color: #64748b; font-size: 0.82rem; padding: 0.5rem 0 1rem;'>"
         "TFM — Predicción de desembarques de pulpo en Perú mediante variables climáticas<br>"
-        "María Ojeda García · Máster en Big Data · 2025/26<br>"
+        "María Ojeda García · Máster en Big Data · DIGITECH · 2025/26<br>"
         "Fuentes: IMARPE · NOAA (CPC) · BOM Australia"
         "</div>",
         unsafe_allow_html=True
