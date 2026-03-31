@@ -198,9 +198,25 @@ try:
 
     
     st.sidebar.header("Selecciona una fecha")
-    anio_pred = st.sidebar.selectbox("Año", list(range(max_anio, 1996, -1)), index=0)
-    mes_pred = st.sidebar.selectbox("Mes", list(range(1, 13)),
-                                     format_func=lambda m: MESES[m - 1], index=0)
+    # Obtener mes y año actuales para el valor por defecto
+    ahora = datetime.now()
+    mes_actual = ahora.month
+    anio_actual = ahora.year
+    # Buscamos en qué posición de la lista está el año actual
+    años_lista = list(range(max_anio, 1996, -1))
+    try:
+        index_anio = años_lista.index(anio_actual)
+    except ValueError:
+        index_anio = 0 # Fallback al primer año si 2026 no está en el rango
+    
+    anio_pred = st.sidebar.selectbox("Año", años_lista, index=index_anio)
+    # Ahora el mes actual
+    mes_pred = st.sidebar.selectbox(
+        "Mes", 
+        list(range(1, 13)),
+        format_func=lambda m: MESES[m - 1], 
+        index=mes_actual - 1  # -1 porque los índices en Python empiezan en 0
+    )
 
     # --- Buscar clima ---
     nino_val, soi_val, fuente_clima = get_climate(anio_pred, mes_pred, df, nino_noaa, soi_noaa)
