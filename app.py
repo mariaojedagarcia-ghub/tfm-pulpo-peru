@@ -597,7 +597,7 @@ Los datos climáticos se actualizan automáticamente cada vez que se abre la app
 
         comparativa = pd.DataFrame([
             {"Método": "Ridge (nuestro modelo)", "R²": f"{r2:.3f}", "MAE (t)": f"{mae:.1f}",
-             "": "✅ Ganador"},
+             "": "Mejor opción"},
             {"Método": "Persistencia (repetir mes anterior)", "R²": f"{r2_naive:.3f}", "MAE (t)": f"{mae_naive:.1f}",
              "": ""},
         ])
