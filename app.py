@@ -610,7 +610,7 @@ Los datos climáticos se actualizan automáticamente cada vez que se abre la app
             r2_estac, mae_estac = None, None
 
         comparativa = pd.DataFrame([
-            {"Método": "Ridge (nuestro modelo)", "R²": f"{r2:.3f}", "MAE (t)": f"{mae:.1f}", "": "✅ Ganador"},
+            {"Método": "Ridge (nuestro modelo)", "R²": f"{r2:.3f}", "MAE (t)": f"{mae:.1f}", "": "Mejor opción"},
             {"Método": "Persistencia (repetir mes anterior)", "R²": f"{r2_naive:.3f}", "MAE (t)": f"{mae_naive:.1f}", "": ""},
         ])
         if r2_estac is not None:
