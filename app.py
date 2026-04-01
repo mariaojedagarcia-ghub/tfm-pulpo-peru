@@ -248,7 +248,7 @@ try:
     pred_final = max(0, model.predict(scaler.transform(ejemplo))[0])
     margen = pred_final * 0.227  # MAPE 22.7%
     # Colocamos el icono aquí para rellenar el hueco inferior
-    st.sidebar.image("icon_pulpo.png", width=120) 
+    st.sidebar.image("mapa_pulpo.png", width=220) 
     # ═══════════════════════════════════════
     #  PESTAÑAS
     # ═══════════════════════════════════════
