@@ -266,7 +266,7 @@ try:
     <style>
         /* Seleccionamos las imágenes dentro de la barra lateral */
         [data-testid="stSidebar"] img {
-            opacity: 0.5; 
+            opacity: 0.4; 
             filter: saturate(70%); 
         }
     </style>
