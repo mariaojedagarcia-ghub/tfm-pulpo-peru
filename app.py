@@ -182,9 +182,21 @@ try:
         st.sidebar.caption(f"Último dato local: {MESES[ultimo_mes - 1]} {ultimo_anio}")
         max_anio = ultimo_anio + 1
 
-    anio_pred = st.sidebar.selectbox("Año", list(range(max_anio, 1996, -1)), index=0)
+# Fecha por defecto: año actual y mes anterior
+    ahora = datetime.now()
+    mes_anterior = (ahora.month - 2) % 12 + 1
+    anio_mes_anterior = ahora.year if ahora.month > 1 else ahora.year - 1
+ 
+    años_lista = list(range(max_anio, 1996, -1))
+    try:
+        idx_anio = años_lista.index(anio_mes_anterior)
+    except ValueError:
+        idx_anio = 0
+ 
+    anio_pred = st.sidebar.selectbox("Año", años_lista, index=idx_anio)
     mes_pred = st.sidebar.selectbox("Mes", list(range(1, 13)),
-                                     format_func=lambda m: MESES[m - 1], index=0)
+                                     format_func=lambda m: MESES[m - 1],
+                                     index=mes_anterior - 1)
 
     # --- Buscar clima ---
     nino_val, soi_val, fuente_clima = get_climate(anio_pred, mes_pred, df, nino_noaa, soi_noaa)
