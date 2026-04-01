@@ -249,8 +249,6 @@ try:
     margen = pred_final * 0.227  # MAPE 22.7%
     # Colocamos el icono aquí para rellenar el hueco inferior
     st.sidebar.image("icon_pulpo.png", width=120) 
-    
-    st.sidebar.header("Selecciona un mes")
     # ═══════════════════════════════════════
     #  PESTAÑAS
     # ═══════════════════════════════════════
