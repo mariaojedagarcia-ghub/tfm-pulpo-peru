@@ -128,26 +128,17 @@ def load_assets():
     return model, scaler, features, df, df_dep
 
 # ═══════════════════════════════════════════
-#  CABECERA (con pulpo estilo marca de agua)
+#  CABECERA
 # ═══════════════════════════════════════════
 
-import base64
-def _img_b64(path):
-    try:
-        with open(path, "rb") as f:
-            return base64.b64encode(f.read()).decode()
-    except:
-        return ""
+st.title("Predicción de Desembarques de Pulpo — Perú")
 
-_b64 = _img_b64("icon_pulpo.png")
-
-# Ajuste de tamaño (280px) y posición para efecto marca de agua
 st.markdown(
-    f"""<div style="position:relative; overflow:hidden; padding: 1.5rem 0 2rem;">
-        {f'<img src="data:image/png;base64,{_b64}" style="position:absolute; right:-30px; top:-40px; width:280px; height:280px; object-fit:contain; opacity:0.08; pointer-events:none; z-index:0;" />' if _b64 else ''}
-        <h1 style="margin:0; padding:0; position:relative; z-index:1; font-size: 2.5rem;">Predicción de Desembarques de Pulpo — Perú</h1>
-    </div>""",
-    unsafe_allow_html=True
+    "**Trabajo Fin de Máster** · María Ojeda García  \n"
+    "Estimación del pulpo que llegará a los puertos peruanos "
+    "a partir de los índices climáticos del Pacífico (Niño 1+2 y SOI) "
+    "y del historial de capturas. "
+    "Los datos climáticos se descargan automáticamente de la NOAA."
 )
 
 # ═══════════════════════════════════════════
@@ -256,7 +247,10 @@ try:
     ejemplo = ejemplo[feature_names]
     pred_final = max(0, model.predict(scaler.transform(ejemplo))[0])
     margen = pred_final * 0.227  # MAPE 22.7%
-
+    # Colocamos el icono aquí para rellenar el hueco inferior
+    st.sidebar.image("icon_pulpo.png", width=120) 
+    
+    st.sidebar.header("Selecciona un mes")
     # ═══════════════════════════════════════
     #  PESTAÑAS
     # ═══════════════════════════════════════
