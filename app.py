@@ -6,7 +6,6 @@ import plotly.graph_objects as go
 import plotly.express as px
 import os
 import requests
-from datetime import datetime
 
 # ─── Configuración ───
 st.set_page_config(
@@ -129,14 +128,26 @@ def load_assets():
     return model, scaler, features, df, df_dep
 
 # ═══════════════════════════════════════════
-#  CABECERA
+#  CABECERA (con pulpo estilo marca de agua)
 # ═══════════════════════════════════════════
 
-col_icon, col_title = st.columns([0.06, 0.94])
-with col_icon:
-    st.image("icon_pulpo.png", width=60)
-with col_title:
-    st.title("Predicción de Desembarques de Pulpo — Perú")
+import base64
+def _img_b64(path):
+    try:
+        with open(path, "rb") as f:
+            return base64.b64encode(f.read()).decode()
+    except:
+        return ""
+
+_b64 = _img_b64("icon_pulpo.png")
+
+st.markdown(
+    f"""<div style="position:relative; overflow:hidden; padding: 0.5rem 0 0.8rem;">
+        {'<img src="data:image/png;base64,' + _b64 + '" style="position:absolute; right:-10px; top:-15px; width:140px; height:140px; object-fit:contain; opacity:0.12; pointer-events:none;" />' if _b64 else ''}
+        <h1 style="margin:0; padding:0; position:relative; z-index:1;">Predicción de Desembarques de Pulpo — Perú</h1>
+    </div>""",
+    unsafe_allow_html=True
+)
 
 st.markdown(
     "**Trabajo Fin de Máster** · María Ojeda García  \n"
@@ -174,11 +185,10 @@ try:
     #  BARRA LATERAL
     # ═══════════════════════════════════════
 
-    st.sidebar.image("icon_pulpo.png", width=50)
     st.sidebar.header("Selecciona un mes")
 
     if noaa_ok:
-        st.sidebar.success("Conectado a la NOAA")
+        st.sidebar.success("Conectado a la NOAA", icon="🌊")
         ultimo_noaa_anio = int(nino_noaa['anio'].max())
         ultimo_noaa_mes = int(nino_noaa[nino_noaa['anio'] == ultimo_noaa_anio]['mes'].max())
         st.sidebar.caption(f"Último dato NOAA: {MESES[ultimo_noaa_mes - 1]} {ultimo_noaa_anio}")
@@ -188,23 +198,9 @@ try:
         st.sidebar.caption(f"Último dato local: {MESES[ultimo_mes - 1]} {ultimo_anio}")
         max_anio = ultimo_anio + 1
 
-    # Fecha por defecto: año actual, mes anterior
-    ahora = datetime.now()
-    mes_defecto = (ahora.month - 2) % 12 + 1
-    anio_defecto = ahora.year if ahora.month > 1 else ahora.year - 1
-
-    años_lista = list(range(max_anio, 1996, -1))
-    try:
-        index_anio = años_lista.index(anio_defecto)
-    except ValueError:
-        index_anio = 0
-
-    anio_pred = st.sidebar.selectbox("Año", años_lista, index=index_anio)
-    mes_pred = st.sidebar.selectbox(
-        "Mes", list(range(1, 13)),
-        format_func=lambda m: MESES[m - 1],
-        index=mes_defecto - 1
-    )
+    anio_pred = st.sidebar.selectbox("Año", list(range(max_anio, 1996, -1)), index=0)
+    mes_pred = st.sidebar.selectbox("Mes", list(range(1, 13)),
+                                     format_func=lambda m: MESES[m - 1], index=0)
 
     # --- Buscar clima ---
     nino_val, soi_val, fuente_clima = get_climate(anio_pred, mes_pred, df, nino_noaa, soi_noaa)
@@ -484,7 +480,6 @@ Los datos climáticos se actualizan automáticamente cada vez que se abre la app
             "como conjunto de test: datos que el modelo nunca vio durante el entrenamiento."
         )
 
-        # Calcular predicciones sobre el test
         from sklearn.metrics import r2_score, mean_absolute_error, mean_absolute_percentage_error
 
         n_test = 24
@@ -539,8 +534,7 @@ Los datos climáticos se actualizan automáticamente cada vez que se abre la app
         fig_perf.add_trace(go.Scatter(
             x=etiquetas, y=y_test_eval,
             mode='lines+markers', name='Real',
-            line=dict(color='white', width=2),
-            marker=dict(size=5),
+            line=dict(color='white', width=2), marker=dict(size=5),
             hovertemplate='%{x}: %{y:.1f} t<extra>Real</extra>'
         ))
         fig_perf.add_trace(go.Scatter(
@@ -550,7 +544,6 @@ Los datos climáticos se actualizan automáticamente cada vez que se abre la app
             marker=dict(size=5, symbol='square'),
             hovertemplate='%{x}: %{y:.1f} t<extra>Predicción</extra>'
         ))
-        # Zona de error
         fig_perf.add_trace(go.Scatter(
             x=etiquetas + etiquetas[::-1],
             y=list(y_test_eval) + list(preds_eval_clip[::-1]),
@@ -561,8 +554,7 @@ Los datos climáticos se actualizan automáticamente cada vez que se abre la app
             template="plotly_dark", height=420,
             legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
             margin=dict(l=10, r=10, t=30, b=10),
-            xaxis_title="", yaxis_title="Toneladas",
-            xaxis=dict(tickangle=-45)
+            xaxis_title="", yaxis_title="Toneladas", xaxis=dict(tickangle=-45)
         )
         st.plotly_chart(fig_perf, use_container_width=True)
 
@@ -577,8 +569,7 @@ Los datos climáticos se actualizan automáticamente cada vez que se abre la app
         colores_err = ['#0ea5e9' if e >= 0 else '#ef4444' for e in errores]
 
         fig_err = go.Figure(go.Bar(
-            x=etiquetas, y=errores,
-            marker_color=colores_err,
+            x=etiquetas, y=errores, marker_color=colores_err,
             hovertemplate='%{x}: %{y:+.1f} t<extra></extra>'
         ))
         fig_err.add_hline(y=0, line_color='white', line_width=0.5)
@@ -597,12 +588,10 @@ Los datos climáticos se actualizan automáticamente cada vez que se abre la app
             "Aquí se compara con repetir el mes anterior (persistencia) y con repetir el mismo mes del año pasado."
         )
 
-        # Baseline persistencia: y(t) = y(t-1)
         baseline_lag1 = df['desembarque_lag1'].values[-n_test:]
         r2_naive = r2_score(y_test_eval, baseline_lag1)
         mae_naive = mean_absolute_error(y_test_eval, baseline_lag1)
 
-        # Baseline estacional: y(t) = y(t-12)
         baseline_lag12 = y_all[-n_test - 12:-12]
         if len(baseline_lag12) == n_test:
             r2_estac = r2_score(y_test_eval, baseline_lag12)
@@ -611,15 +600,12 @@ Los datos climáticos se actualizan automáticamente cada vez que se abre la app
             r2_estac, mae_estac = None, None
 
         comparativa = pd.DataFrame([
-            {"Método": "Ridge (nuestro modelo)", "R²": f"{r2:.3f}", "MAE (t)": f"{mae:.1f}",
-             "": "Mejor opción"},
-            {"Método": "Persistencia (repetir mes anterior)", "R²": f"{r2_naive:.3f}", "MAE (t)": f"{mae_naive:.1f}",
-             "": ""},
+            {"Método": "Ridge (nuestro modelo)", "R²": f"{r2:.3f}", "MAE (t)": f"{mae:.1f}", "": "✅ Ganador"},
+            {"Método": "Persistencia (repetir mes anterior)", "R²": f"{r2_naive:.3f}", "MAE (t)": f"{mae_naive:.1f}", "": ""},
         ])
         if r2_estac is not None:
             comparativa = pd.concat([comparativa, pd.DataFrame([
-                {"Método": "Estacional (mismo mes, año anterior)", "R²": f"{r2_estac:.3f}", "MAE (t)": f"{mae_estac:.1f}",
-                 "": ""}
+                {"Método": "Estacional (mismo mes, año anterior)", "R²": f"{r2_estac:.3f}", "MAE (t)": f"{mae_estac:.1f}", "": ""}
             ])], ignore_index=True)
 
         st.dataframe(comparativa, use_container_width=True, hide_index=True)
