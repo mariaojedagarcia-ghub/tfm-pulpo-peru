@@ -260,14 +260,14 @@ try:
     ejemplo = ejemplo[feature_names]
     pred_final = max(0, model.predict(scaler.transform(ejemplo))[0])
     margen = pred_final * 0.227  # MAPE 22.7%
-# La imagen se estirará hasta tocar los bordes de la barra lateral
+# La imagen se estirará hasta tocar los bordes de la barra lateral y transparente
     st.sidebar.markdown(
     """
     <style>
         /* Seleccionamos las imágenes dentro de la barra lateral */
         [data-testid="stSidebar"] img {
-            opacity: 0.3; /* Ajusta este valor: 0.1 es muy invisible, 0.9 es casi sólido */
-            filter: saturate(70%); /* Opcional: le quita un poco de viveza para que no distraiga */
+            opacity: 0.5; 
+            filter: saturate(70%); 
         }
     </style>
     """,
