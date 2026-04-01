@@ -141,20 +141,13 @@ def _img_b64(path):
 
 _b64 = _img_b64("icon_pulpo.png")
 
+# Ajuste de tamaño (280px) y posición para efecto marca de agua
 st.markdown(
-    f"""<div style="position:relative; overflow:hidden; padding: 0.5rem 0 0.8rem;">
-        {'<img src="data:image/png;base64,' + _b64 + '" style="position:absolute; right:-10px; top:-15px; width:140px; height:140px; object-fit:contain; opacity:0.12; pointer-events:none;" />' if _b64 else ''}
-        <h1 style="margin:0; padding:0; position:relative; z-index:1;">Predicción de Desembarques de Pulpo — Perú</h1>
+    f"""<div style="position:relative; overflow:hidden; padding: 1.5rem 0 2rem;">
+        {f'<img src="data:image/png;base64,{_b64}" style="position:absolute; right:-30px; top:-40px; width:280px; height:280px; object-fit:contain; opacity:0.08; pointer-events:none; z-index:0;" />' if _b64 else ''}
+        <h1 style="margin:0; padding:0; position:relative; z-index:1; font-size: 2.5rem;">Predicción de Desembarques de Pulpo — Perú</h1>
     </div>""",
     unsafe_allow_html=True
-)
-
-st.markdown(
-    "**Trabajo Fin de Máster** · María Ojeda García  \n"
-    "Estimación del pulpo que llegará a los puertos peruanos "
-    "a partir de los índices climáticos del Pacífico (Niño 1+2 y SOI) "
-    "y del historial de capturas. "
-    "Los datos climáticos se descargan automáticamente de la NOAA."
 )
 
 # ═══════════════════════════════════════════
