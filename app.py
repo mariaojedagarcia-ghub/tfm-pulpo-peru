@@ -6,7 +6,6 @@ import plotly.graph_objects as go
 import plotly.express as px
 import os
 import requests
-from datetime import datetime
 
 # ─── Configuración ───
 st.set_page_config(
@@ -153,16 +152,6 @@ st.markdown(
 try:
     model, scaler, feature_names, df, df_dep = load_assets()
 
-    # Compatibilidad: normalizar nombres de columna (versiones antiguas usan 'año')
-    if 'año' in df.columns:
-        df = df.rename(columns={'año': 'anio'})
-    if 'desembarques_t' in df.columns and 'desembarque_t' not in df.columns:
-        df = df.rename(columns={'desembarques_t': 'desembarque_t'})
-    if 'nino12' in df.columns and 'nino12_anom' not in df.columns:
-        df = df.rename(columns={'nino12': 'nino12_anom'})
-    if df_dep is not None and 'año' in df_dep.columns:
-        df_dep = df_dep.rename(columns={'año': 'anio'})
-
     # Fechas para gráficas
     df_plot = df.copy()
     df_plot['fecha'] = pd.to_datetime(
@@ -184,10 +173,11 @@ try:
     #  BARRA LATERAL
     # ═══════════════════════════════════════
 
-
+    st.sidebar.image("icon_pulpo.png", width=50)
+    st.sidebar.header("Selecciona un mes")
 
     if noaa_ok:
-        st.sidebar.success("Conectado a la NOAA")
+        st.sidebar.success("Conectado a la NOAA", icon="🌊")
         ultimo_noaa_anio = int(nino_noaa['anio'].max())
         ultimo_noaa_mes = int(nino_noaa[nino_noaa['anio'] == ultimo_noaa_anio]['mes'].max())
         st.sidebar.caption(f"Último dato NOAA: {MESES[ultimo_noaa_mes - 1]} {ultimo_noaa_anio}")
@@ -197,37 +187,10 @@ try:
         st.sidebar.caption(f"Último dato local: {MESES[ultimo_mes - 1]} {ultimo_anio}")
         max_anio = ultimo_anio + 1
 
-    
-    st.sidebar.header("Selecciona una fecha")
-    # Obtener mes y año actuales para el valor por defecto
-    # --- Lógica de fecha por defecto (Mes Anterior) ---
+    anio_pred = st.sidebar.selectbox("Año", list(range(max_anio, 1996, -1)), index=0)
+    mes_pred = st.sidebar.selectbox("Mes", list(range(1, 13)),
+                                     format_func=lambda m: MESES[m - 1], index=0)
 
-    ahora = datetime.now()
-    
-    # Usamos el operador módulo para que el mes siempre sea válido (1-12)
-    # Si ahora es 1 (Enero), (1 - 2) % 12 + 1 = 12 (Diciembre)
-    mes_defecto = (ahora.month - 2) % 12 + 1
-    anio_defecto = ahora.year if ahora.month > 1 else ahora.year - 1
-    
-    st.sidebar.header("Selecciona una fecha")
-    
-    # Configuración Año
-    años_lista = list(range(max_anio, 1996, -1))
-    try:
-        index_anio = años_lista.index(anio_defecto)
-    except ValueError:
-        index_anio = 0
-    
-    anio_pred = st.sidebar.selectbox("Año", años_lista, index=index_anio)
-    
-    # Configuración Mes
-    # El índice para el selectbox es simplemente mes_defecto - 1
-    mes_pred = st.sidebar.selectbox(
-        "Mes", 
-        list(range(1, 13)),
-        format_func=lambda m: MESES[m - 1], 
-        index=mes_defecto - 1
-    )
     # --- Buscar clima ---
     nino_val, soi_val, fuente_clima = get_climate(anio_pred, mes_pred, df, nino_noaa, soi_noaa)
 
@@ -294,7 +257,7 @@ try:
     #  PESTAÑAS
     # ═══════════════════════════════════════
 
-    tab1, tab2 = st.tabs(["Vista general", "Por departamento"])
+    tab1, tab2, tab3 = st.tabs(["Vista general", "Por departamento", "Rendimiento del modelo"])
 
     with tab1:
 
@@ -496,13 +459,170 @@ Los datos climáticos se actualizan automáticamente cada vez que se abre la app
                     "Sube `datos_departamento.parquet` junto a los demás archivos para activar esta sección.")
 
     # ═══════════════════════════════════════
+    #  PESTAÑA 3: RENDIMIENTO DEL MODELO
+    # ═══════════════════════════════════════
+
+    with tab3:
+        st.subheader("¿Cómo de bien predice el modelo?")
+        st.caption(
+            "El modelo se evaluó reservando los **últimos 24 meses** de datos (enero 2024 – diciembre 2025) "
+            "como conjunto de test: datos que el modelo nunca vio durante el entrenamiento."
+        )
+
+        # Calcular predicciones sobre el test
+        from sklearn.metrics import r2_score, mean_absolute_error, mean_absolute_percentage_error
+
+        n_test = 24
+        X_all = df[feature_names].values
+        y_all = df['desembarque_t'].values
+        X_test_eval = X_all[-n_test:]
+        y_test_eval = y_all[-n_test:]
+
+        X_test_sc_eval = scaler.transform(X_test_eval)
+        preds_eval = model.predict(X_test_sc_eval)
+        preds_eval_clip = np.maximum(0, preds_eval)
+
+        r2 = r2_score(y_test_eval, preds_eval_clip)
+        mae = mean_absolute_error(y_test_eval, preds_eval_clip)
+        mape = mean_absolute_percentage_error(y_test_eval, preds_eval_clip) * 100
+
+        # --- Métricas en tarjetas ---
+        m1, m2, m3 = st.columns(3)
+        with m1:
+            st.markdown(f"""<div class="metric-card" style="border-left-color: #22c55e;">
+                <h3>R² (coeficiente de determinación)</h3>
+                <p class="value">{r2:.3f}</p>
+                <p class="detail">El modelo explica el {r2*100:.0f}% de la variabilidad</p>
+            </div>""", unsafe_allow_html=True)
+        with m2:
+            st.markdown(f"""<div class="metric-card" style="border-left-color: #f59e0b;">
+                <h3>MAE (error medio absoluto)</h3>
+                <p class="value">{mae:.1f} t</p>
+                <p class="detail">De media, se desvía {mae:.1f} toneladas del valor real</p>
+            </div>""", unsafe_allow_html=True)
+        with m3:
+            st.markdown(f"""<div class="metric-card" style="border-left-color: #3b82f6;">
+                <h3>MAPE (error porcentual medio)</h3>
+                <p class="value">{mape:.1f}%</p>
+                <p class="detail">Las predicciones se desvían de media un {mape:.1f}%</p>
+            </div>""", unsafe_allow_html=True)
+
+        st.markdown("")
+
+        # --- Gráfica: Predicción vs Real ---
+        st.subheader("Predicción vs realidad (últimos 24 meses)")
+        st.caption(
+            "La línea negra son los desembarques que realmente ocurrieron. "
+            "La línea azul es lo que el modelo habría predicho. "
+            "La zona sombreada es la diferencia (el error)."
+        )
+
+        fechas_test = df[['anio', 'mes']].iloc[-n_test:]
+        etiquetas = [f"{int(r['anio'])}-{int(r['mes']):02d}" for _, r in fechas_test.iterrows()]
+
+        fig_perf = go.Figure()
+        fig_perf.add_trace(go.Scatter(
+            x=etiquetas, y=y_test_eval,
+            mode='lines+markers', name='Real',
+            line=dict(color='white', width=2),
+            marker=dict(size=5),
+            hovertemplate='%{x}: %{y:.1f} t<extra>Real</extra>'
+        ))
+        fig_perf.add_trace(go.Scatter(
+            x=etiquetas, y=preds_eval_clip,
+            mode='lines+markers', name='Predicción Ridge',
+            line=dict(color='#0ea5e9', width=2, dash='dash'),
+            marker=dict(size=5, symbol='square'),
+            hovertemplate='%{x}: %{y:.1f} t<extra>Predicción</extra>'
+        ))
+        # Zona de error
+        fig_perf.add_trace(go.Scatter(
+            x=etiquetas + etiquetas[::-1],
+            y=list(y_test_eval) + list(preds_eval_clip[::-1]),
+            fill='toself', fillcolor='rgba(14,165,233,0.12)',
+            line=dict(width=0), showlegend=False, hoverinfo='skip'
+        ))
+        fig_perf.update_layout(
+            template="plotly_dark", height=420,
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+            margin=dict(l=10, r=10, t=30, b=10),
+            xaxis_title="", yaxis_title="Toneladas",
+            xaxis=dict(tickangle=-45)
+        )
+        st.plotly_chart(fig_perf, use_container_width=True)
+
+        # --- Gráfica: Error por mes ---
+        st.subheader("Error por mes")
+        st.caption(
+            "Cada barra muestra cuánto se equivocó el modelo en ese mes. "
+            "Azul = subestimó (predijo menos de lo real). Rojo = sobreestimó."
+        )
+
+        errores = y_test_eval - preds_eval_clip
+        colores_err = ['#0ea5e9' if e >= 0 else '#ef4444' for e in errores]
+
+        fig_err = go.Figure(go.Bar(
+            x=etiquetas, y=errores,
+            marker_color=colores_err,
+            hovertemplate='%{x}: %{y:+.1f} t<extra></extra>'
+        ))
+        fig_err.add_hline(y=0, line_color='white', line_width=0.5)
+        fig_err.update_layout(
+            template="plotly_dark", height=300,
+            margin=dict(l=10, r=10, t=20, b=10),
+            xaxis_title="", yaxis_title="Error (t)",
+            xaxis=dict(tickangle=-45), showlegend=False
+        )
+        st.plotly_chart(fig_err, use_container_width=True)
+
+        # --- Comparativa con baselines ---
+        st.subheader("¿Supera el modelo a las predicciones más simples?")
+        st.caption(
+            "Para que un modelo tenga valor, debe superar a las estrategias triviales. "
+            "Aquí se compara con repetir el mes anterior (persistencia) y con repetir el mismo mes del año pasado."
+        )
+
+        # Baseline persistencia: y(t) = y(t-1)
+        baseline_lag1 = df['desembarque_lag1'].values[-n_test:]
+        r2_naive = r2_score(y_test_eval, baseline_lag1)
+        mae_naive = mean_absolute_error(y_test_eval, baseline_lag1)
+
+        # Baseline estacional: y(t) = y(t-12)
+        baseline_lag12 = y_all[-n_test - 12:-12]
+        if len(baseline_lag12) == n_test:
+            r2_estac = r2_score(y_test_eval, baseline_lag12)
+            mae_estac = mean_absolute_error(y_test_eval, baseline_lag12)
+        else:
+            r2_estac, mae_estac = None, None
+
+        comparativa = pd.DataFrame([
+            {"Método": "Ridge (nuestro modelo)", "R²": f"{r2:.3f}", "MAE (t)": f"{mae:.1f}",
+             "": "✅ Ganador"},
+            {"Método": "Persistencia (repetir mes anterior)", "R²": f"{r2_naive:.3f}", "MAE (t)": f"{mae_naive:.1f}",
+             "": ""},
+        ])
+        if r2_estac is not None:
+            comparativa = pd.concat([comparativa, pd.DataFrame([
+                {"Método": "Estacional (mismo mes, año anterior)", "R²": f"{r2_estac:.3f}", "MAE (t)": f"{mae_estac:.1f}",
+                 "": ""}
+            ])], ignore_index=True)
+
+        st.dataframe(comparativa, use_container_width=True, hide_index=True)
+
+        mejora = mae_naive - mae
+        st.markdown(
+            f"El modelo Ridge reduce el error en **{mejora:.1f} toneladas por mes** "
+            f"respecto a simplemente repetir el dato del mes anterior."
+        )
+
+    # ═══════════════════════════════════════
     #  PIE DE PÁGINA
     # ═══════════════════════════════════════
     st.markdown("---")
     st.markdown(
         "<div style='text-align:center; color:#64748b; font-size:0.82rem; padding:0.5rem 0 1rem;'>"
         "TFM — Predicción de desembarques de pulpo en Perú mediante variables climáticas<br>"
-        "María Ojeda García · Máster en Big Data (DIGITECH) · 2025<br>"
+        "María Ojeda García · Máster en Big Data · 2025<br>"
         "Fuentes: IMARPE · NOAA (CPC) · BOM Australia</div>",
         unsafe_allow_html=True)
 
@@ -512,13 +632,4 @@ except FileNotFoundError as e:
             "`feature_names.pkl`, `datos_modelo.parquet`, `icon_pulpo.png`, "
             "y (opcional) `datos_departamento.parquet`.")
 except Exception as e:
-    import traceback
     st.error(f"Error inesperado: {e}")
-    with st.expander("Detalle del error (para depuración)"):
-        st.code(traceback.format_exc())
-        # Mostrar info de los archivos cargados para diagnosticar
-        try:
-            df_debug = pd.read_parquet('datos_modelo.parquet')
-            st.write(f"Columnas del parquet: {df_debug.columns.tolist()}")
-        except:
-            st.write("No se pudo leer datos_modelo.parquet")
