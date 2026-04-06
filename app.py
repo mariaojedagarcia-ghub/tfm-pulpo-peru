@@ -532,7 +532,7 @@ Los datos climáticos se actualizan automáticamente cada vez que se abre la app
         # --- Gráfica: Predicción vs Real ---
         st.subheader("Predicción vs realidad (últimos 24 meses)")
         st.caption(
-            "La línea negra son los desembarques que realmente ocurrieron. "
+            "La línea blanca son los desembarques que realmente ocurrieron. "
             "La línea azul es lo que el modelo habría predicho. "
             "La zona sombreada es la diferencia (el error)."
         )
