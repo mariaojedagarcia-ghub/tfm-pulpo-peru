@@ -204,10 +204,14 @@ try:
         st.sidebar.caption(f"Último dato local: {MESES[ultimo_mes - 1]} {ultimo_anio}")
         max_anio = ultimo_anio + 1
 
-# Fecha por defecto: año actual y mes anterior
-    ahora = datetime.now()
-    mes_anterior = (ahora.month - 2) % 12 + 1
-    anio_mes_anterior = ahora.year if ahora.month > 1 else ahora.year - 1
+# Fecha por defecto: año actual y último mes del que tenemos datos puplicados de NOAA
+    if noaa_ok:
+        mes_anterior = ultimo_noaa_mes
+        anio_mes_anterior = ultimo_noaa_anio
+    else:
+        ahora = datetime.now()
+        mes_anterior = (ahora.month - 2) % 12 + 1
+        anio_mes_anterior = ahora.year if ahora.month > 1 else ahora.year - 1
  
     años_lista = list(range(max_anio, 1996, -1))
     try:
