@@ -30,6 +30,27 @@ st.markdown("""
     .stTabs [data-baseweb="tab-list"] { gap: 2rem; }
 </style>
 """, unsafe_allow_html=True)
+with st.expander(" Cómo usar esta app", expanded=False):
+    st.markdown("""
+**Paso 1 — Elige el mes que quieres predecir**  
+En la barra lateral izquierda, selecciona el año y el mes. La app obtiene automáticamente los datos climáticos de ese período desde la NOAA.
+
+**Paso 2 — Consulta la predicción**  
+En la pestaña *Vista general* verás cuántas toneladas estima el modelo para ese mes, junto al rango de incertidumbre y la condición climática (El Niño / La Niña / Neutro).
+
+**Paso 3 — Explora las demás pestañas**  
+- *Por departamento*: distribución geográfica de las capturas históricas a lo largo de la costa peruana.  
+- *Rendimiento del modelo*: cómo de bien ha predicho el modelo en datos que nunca había visto.
+
+---
+**Cómo interactuar con los gráficos**  
+Todos los gráficos son interactivos (Plotly):
+- **Zoom**: dibuja un rectángulo con el ratón sobre el área que quieras ampliar, o usa la rueda del ratón.
+- **Desplazarte**: haz clic y arrastra cuando estés en modo paneo (icono de la mano en la barra superior del gráfico).
+- **Pasar el ratón**: al pasar por encima de cualquier punto o barra aparece el valor exacto.
+- **Mostrar/ocultar series**: haz clic en los elementos de la leyenda para activar o desactivar líneas.
+- **Restablecer la vista**: doble clic en el gráfico, o el icono de casa en la barra de herramientas.
+    """)
 
 # ═══════════════════════════════════════════
 #  DESCARGA AUTOMÁTICA NOAA
